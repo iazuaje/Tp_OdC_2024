@@ -6,8 +6,8 @@ Trabajo práctico grupal - Organización del computador - Curso Benitez - 2024
 
 * Iván Azuaje - 107957
 * Cecilia Arancibia - 104650
-* Julián Rettori - 106581 (deceased (not in the gruoup anymore 😔))
-* Gabriela Choque - 93055 (deceased (not in the gruoup anymore 😔))
+* Julián Rettori - 106581 (deceased (not in the group anymore 😔))
+* Gabriela Choque - 93055 (deceased (not in the group anymore 😔))
 
 ## Tema
 
