@@ -1,0 +1,66 @@
+     1                                  %include "macrosInputOutput.asm"
+     1                              <1> %macro print 2
+     2                              <1>     mov     rdi, %1
+     3                              <1>     mov     rsi, %2
+     4                              <1>     sub     rsp, 8
+     5                              <1>     call    printf
+     6                              <1>     add     rsp, 8
+     7                              <1> %endmacro
+     8                              <1> 
+     9                              <1> %macro get 1
+    10                              <1>     mov     rdi, %1
+    11                              <1>     sub     rsp, 8
+    12                              <1>     call    gets
+    13                              <1>     add     rsp, 8
+    14                              <1> %endmacro
+    15                              <1> 
+    16                              <1> extern printf
+    17                              <1> extern gets
+    18                              <1> 
+     2                                  global main
+     3                                  
+     4                                  section .bss
+     5 00000000 <res 32h>                   nombre resb 50
+     6                                      
+     7                                  section .data
+     8 00000000 486F6C61206D756E64-         mensaje     db      "Hola mundo",10,0
+     8 00000009 6F0A00             
+     9 0000000C 4375C3A16C20657320-         mensaje1    db      "Cuál es tu nombre?",10,0
+     9 00000015 7475206E6F6D627265-
+     9 0000001E 3F0A00             
+    10 00000021 4D7563686F20677573-         msgfinal    db      "Mucho gusto en conocerte, %s",10, 0
+    10 0000002A 746F20656E20636F6E-
+    10 00000033 6F63657274652C2025-
+    10 0000003C 730A00             
+    11                                  
+    12                                  section .text
+    13                                  main:
+    14                                      print   mensaje, 0
+     2 00000000 48BF-               <1>  mov rdi, %1
+     2 00000002 [0000000000000000]  <1>
+     3 0000000A BE00000000          <1>  mov rsi, %2
+     4 0000000F 4883EC08            <1>  sub rsp, 8
+     5 00000013 E8(00000000)        <1>  call printf
+     6 00000018 4883C408            <1>  add rsp, 8
+    15                                      print   mensaje1, 0
+     2 0000001C 48BF-               <1>  mov rdi, %1
+     2 0000001E [0C00000000000000]  <1>
+     3 00000026 BE00000000          <1>  mov rsi, %2
+     4 0000002B 4883EC08            <1>  sub rsp, 8
+     5 0000002F E8(00000000)        <1>  call printf
+     6 00000034 4883C408            <1>  add rsp, 8
+    16                                      get     nombre
+    10 00000038 48BF-               <1>  mov rdi, %1
+    10 0000003A [0000000000000000]  <1>
+    11 00000042 4883EC08            <1>  sub rsp, 8
+    12 00000046 E8(00000000)        <1>  call gets
+    13 0000004B 4883C408            <1>  add rsp, 8
+    17                                      print   msgfinal, nombre
+     2 0000004F 48BF-               <1>  mov rdi, %1
+     2 00000051 [2100000000000000]  <1>
+     3 00000059 48BE-               <1>  mov rsi, %2
+     3 0000005B [0000000000000000]  <1>
+     4 00000063 4883EC08            <1>  sub rsp, 8
+     5 00000067 E8(00000000)        <1>  call printf
+     6 0000006C 4883C408            <1>  add rsp, 8
+    18 00000070 C3                          ret
