@@ -13,6 +13,17 @@
     add     rsp, 8
 %endmacro
 
+%macro limpiarPantalla 0
+    mov     rdi, cmd_clear
+    sub     rsp, 8
+    call    system
+    add     rsp, 8
+%endmacro
+
 extern printf
 extern gets
+extern system
+
+section .data
+    cmd_clear db    "clear",0
 

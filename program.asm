@@ -2,17 +2,48 @@
 global main
 
 section .bss
-    nombre resb 50
+    inputJugador        resb 1
     
 section .data
-    mensaje     db      "Hola mundo",10,0
-    mensaje1    db      "Cuál es tu nombre?",10,0
-    msgfinal    db      "Mucho gusto en conocerte, %s",10, 0
-
+    msjInput            db  "Ingrese su movimiento:", 10, 0
+    msjInputError       db  "El valor ingresado es invalido, ingrese otro:", 10, 0
+    msjJgSoldados       db  "Turno de los soldados:", 10, 0
+    msjJgOficiales      db  "Turno de los oficiales:", 10, 0
+    esTurnoSoldados     db  0
 section .text
 main:
-    print   mensaje, 0
-    print   mensaje1, 0
-    get     nombre
-    print   msgfinal, nombre
+    limpiarPantalla
+    ;ACÁ IRÍA DIBUJAR EL TABLERO
+    cmp byte[esTurnoSoldados], 0
+    je turnoSoldados
+    jmp turnoOficiales
+    
+turnoSoldados:
+    print msjJgSoldados, 0
+    ;logica para soldados
+    not byte[esTurnoSoldados]
+    jmp input
+    
+turnoOficiales:
+    print msjJgOficiales, 0
+    ;Logica para oficiales
+    not byte[esTurnoSoldados]
+    jmp input
+
+input:
+    print msjInput, 0
+    get inputJugador
+    cmp byte[inputJugador], "p"
+    je fin
+    cmp byte[inputJugador], "y"
+    je main
+    cmp byte[inputJugador], "n"
+    je main
+    jmp inputErroneo
+    
+inputErroneo:
+    print msjInputError, 0
+    jmp input
+    
+fin:
     ret
