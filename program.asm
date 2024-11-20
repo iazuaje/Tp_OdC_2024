@@ -1,4 +1,6 @@
 %include "macrosInputOutput.asm"
+%include "tablero.asm"
+
 global main
 
 section .bss
@@ -12,8 +14,11 @@ section .data
     esTurnoSoldados     db  0
 section .text
 main:
-    limpiarPantalla
-    ;ACÁ IRÍA DIBUJAR EL TABLERO
+    ;limpiarPantalla
+    ;===================
+    call initTablero
+    call printTablero
+    ;====================
     cmp byte[esTurnoSoldados], 0
     je turnoSoldados
     jmp turnoOficiales
