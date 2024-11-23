@@ -9,11 +9,9 @@
 ;
 ;***************************************************************************
 
-%include "macrosMatriz.asm"
 extern printf
 
 section	.data
-	msjSalUno	db	'Elemento guardado en fila %li columna %li: %c',10,13,0
 
 
 	
@@ -25,48 +23,78 @@ section	.data
 			dw	"* ","* ","_ ","_ ","_O","* ","* "       
 			dw	"* ","* ","_O","_ ","_ ","* ","* " 
 
-        i               dd      0
-        j               dd      0
-
+        i               dq      0 ; para recorrer filas
+        j               dq      0 ; para recorrer columnas
+        indiceActual    dq      0
 	
 
         LONG_ELEM	equ	2
 	CANT_FIL	equ	7
 	CANT_COL	equ	7
-        MAX_CASILLAS    equ     49
+        MAX_CASILLAS    equ     98
+        
+        caracterSinSalto              db      '%c',0
+        caracterConSalto              db      10,0
 
 
 
 section .text
 
 imprimirTablero:
-    ;mov ebp, esp; for correct debugging
-    sub		 rsp,8
-    mov		 eax,[i]	;eax = elemento (4 bytes / dword)									
-    cdqe									
+    
+    sub		 rsp,  8
+    mov          rax, 0  
+    jmp          inicioCiclo
+    
+							
     
 inicioCiclo:
-    cmp          rax, MAX_CASILLAS             
+            
+    cmp          rax, MAX_CASILLAS
     jge          salirCiclo
     
-    mov          ebx,i   
-    asignarRdi   
-                                    
-    mov          ebx, [i]                   ; aca carga el indice i 
-    imul         ebx, LONG_ELEM             ; calculo desplazamiento (i * LONG_ELEM)
-    mov          rsi, QWORD[matriz + ebx]   ; cargo el char (primer byte del elemento) 
+    mov          rax, [i]       
+    imul         rax, LONG_ELEM
+    imul         rax, CANT_COL
     
-    sub          rax,rax  ;esto es necesario por limpiar el rax para prepararlo para el printf (eso entiendo)
-    call         printf
+    mov          rbx, rax
+    
+    mov          rax, [j]
+    imul         rax, LONG_ELEM          
+    add		 rbx, rax
+    
+    mov          rdi, caracterSinSalto
+    sub          rsi, rsi
+    
+    ;===================================
+    ; aca hay que chequear si hay pieza
+    ;===================================
+    mov          rsi,  QWORD[matriz + rbx]
+
+    sub          rax,rax
+    call	 printf
     
     
-    inc          QWORD[i]                 
-    mov		 eax,[i]	;eax = elemento (4 bytes / dword)									
-    cdqe
+    inc         QWORD[j]
+    cmp         QWORD[j], CANT_COL
+    jge         reiniciarIndiceColumna
+    mov         rax, rbx
     
-    jmp inicioCiclo
+    jmp         inicioCiclo
+
+
 
 salirCiclo:
-    add         rsp,8
+    add		 rsp,  8
     ret
     
+reiniciarIndiceColumna:
+    mov          rdi, caracterConSalto
+    sub          rsi, rsi
+    sub          rax,rax
+    call	 printf
+
+    mov         QWORD[j],0
+    inc         QWORD[i]
+    mov         rax, rbx
+    jmp         inicioCiclo
