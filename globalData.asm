@@ -1,3 +1,5 @@
+%include "macrosInputOutput.asm"
+
 global GlobalData
 section .data
     matriz  dw	"* ","* ",".X",".X",".X","* ","* "          
@@ -12,3 +14,5 @@ section .data
     CANT_FIL        equ 7
     CANT_COL        equ 7
     MAX_CASILLAS    equ 96
+    
+    caracterConSalto    db  10,0

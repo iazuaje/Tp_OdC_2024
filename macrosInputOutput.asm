@@ -1,4 +1,5 @@
 %macro print 2
+    mov     rax, 0 ; Limpiamos el rax para evitar errores
     mov     rdi, %1
     mov     rsi, %2
     sub     rsp, 8
