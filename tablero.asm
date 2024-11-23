@@ -25,15 +25,14 @@ section	.data
 
         i               dq      0 ; para recorrer filas
         j               dq      0 ; para recorrer columnas
-        indiceActual    dq      0
 	
 
         LONG_ELEM	equ	2
 	CANT_FIL	equ	7
 	CANT_COL	equ	7
-        MAX_CASILLAS    equ     98
+        MAX_CASILLAS    equ     96
         
-        caracterSinSalto              db      '%c',0
+        caracterSinSalto              db      ' %c',0
         caracterConSalto              db      10,0
 
 
@@ -66,11 +65,21 @@ inicioCiclo:
     mov          rdi, caracterSinSalto
     sub          rsi, rsi
     
+    mov          rsi,  QWORD[matriz + rbx]
+    
     ;===================================
     ; aca hay que chequear si hay pieza
+    ; if(segundo char es una pieza X o O)
+    ; mov rsi, QWORD [matriz + rbx + 1]
+    cmp         BYTE[matriz + rbx + 1], 'X'
+    je          printearPieza
+    cmp         BYTE[matriz + rbx + 1], 'O'
+    je          printearPieza
     ;===================================
-    mov          rsi,  QWORD[matriz + rbx]
+    
+    jmp         imprimirCasilla
 
+imprimirCasilla:
     sub          rax,rax
     call	 printf
     
@@ -85,6 +94,11 @@ inicioCiclo:
 
 
 salirCiclo:
+    mov          rdi, caracterConSalto
+    sub          rsi, rsi
+    sub          rax,rax
+    call	 printf
+    
     add		 rsp,  8
     ret
     
@@ -98,3 +112,8 @@ reiniciarIndiceColumna:
     inc         QWORD[i]
     mov         rax, rbx
     jmp         inicioCiclo
+    
+printearPieza:
+    mov         rsi,  QWORD[matriz + rbx + 1]
+    jmp         imprimirCasilla
+    
