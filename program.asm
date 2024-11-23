@@ -14,10 +14,9 @@ section .data
     esTurnoSoldados     db  0
 section .text
 main:
-    ;limpiarPantalla
+    limpiarPantalla
     ;===================
-    call initTablero
-    call printTablero
+    call imprimirTablero
     ;====================
     cmp byte[esTurnoSoldados], 0
     je turnoSoldados

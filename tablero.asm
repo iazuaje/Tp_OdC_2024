@@ -8,112 +8,83 @@
 ;       (temporalmente la defino acá, la idea seria que sea definida en program.asm)	
 ;
 ;***************************************************************************
-
 extern printf
+%include "globalData.asm"
+
+%macro saltarLinea 0
+    mov     rdi, caracterConSalto
+    sub     rsi, rsi
+    sub     rax, rax
+    call    printf
+%endmacro
 
 section	.data
-
-
+    iteradorFila        dq  0 ; para recorrer filas
+    iteradorColumna     dq  0 ; para recorrer columnas
 	
-	matriz		dw	"* ","* ",".X",".X",".X","* ","* "          
-			dw	"* ","* ",".X",".X",".X","* ","* "       
-			dw	".X",".X",".X",".X",".X",".X",".X"
-			dw	".X",".X",".X",".X",".X",".X",".X"       
-			dw	".X",".X","_ ","_ ","_ ",".X",".X" 
-			dw	"* ","* ","_ ","_ ","_O","* ","* "       
-			dw	"* ","* ","_O","_ ","_ ","* ","* " 
-
-        i               dq      0 ; para recorrer filas
-        j               dq      0 ; para recorrer columnas
-	
-
-        LONG_ELEM	equ	2
-	CANT_FIL	equ	7
-	CANT_COL	equ	7
-        MAX_CASILLAS    equ     96
-        
-        caracterSinSalto              db      ' %c',0
-        caracterConSalto              db      10,0
-
-
+    caracterSinSalto    db  ' %c',0
+    caracterConSalto    db  10,0
 
 section .text
-
 imprimirTablero:
+    sub     rsp, 8
+    mov     rax, 0  
+    jmp     inicioCiclo
     
-    sub		 rsp,  8
-    mov          rax, 0  
-    jmp          inicioCiclo
+inicioCiclo:    
+    cmp     rax, MAX_CASILLAS
+    jge     salirCiclo
     
-							
+    mov     rax, [iteradorFila]       
+    imul    rax, LONG_ELEM
+    imul    rax, CANT_COL
     
-inicioCiclo:
-            
-    cmp          rax, MAX_CASILLAS
-    jge          salirCiclo
+    mov     rbx, rax
     
-    mov          rax, [i]       
-    imul         rax, LONG_ELEM
-    imul         rax, CANT_COL
+    mov     rax, [iteradorColumna]
+    imul    rax, LONG_ELEM          
+    add     rbx, rax
     
-    mov          rbx, rax
+    mov     rdi, caracterSinSalto
+    sub     rsi, rsi
     
-    mov          rax, [j]
-    imul         rax, LONG_ELEM          
-    add		 rbx, rax
-    
-    mov          rdi, caracterSinSalto
-    sub          rsi, rsi
-    
-    mov          rsi,  QWORD[matriz + rbx]
+    mov     rsi, QWORD[matriz + rbx]
     
     ;===================================
     ; aca hay que chequear si hay pieza
     ; if(segundo char es una pieza X o O)
     ; mov rsi, QWORD [matriz + rbx + 1]
-    cmp         BYTE[matriz + rbx + 1], 'X'
-    je          printearPieza
-    cmp         BYTE[matriz + rbx + 1], 'O'
-    je          printearPieza
+    cmp     BYTE[matriz + rbx + 1], 'X'
+    je      printearPieza
+    cmp     BYTE[matriz + rbx + 1], 'O'
+    je      printearPieza
     ;===================================
     
-    jmp         imprimirCasilla
+    jmp     imprimirCasilla
 
 imprimirCasilla:
-    sub          rax,rax
-    call	 printf
+    sub     rax,rax
+    call    printf
     
+    inc     QWORD[iteradorColumna]
+    cmp     QWORD[iteradorColumna], CANT_COL
+    jge     reiniciarIndiceColumna
+    mov     rax, rbx
     
-    inc         QWORD[j]
-    cmp         QWORD[j], CANT_COL
-    jge         reiniciarIndiceColumna
-    mov         rax, rbx
-    
-    jmp         inicioCiclo
-
-
+    jmp     inicioCiclo
 
 salirCiclo:
-    mov          rdi, caracterConSalto
-    sub          rsi, rsi
-    sub          rax,rax
-    call	 printf
-    
-    add		 rsp,  8
+    saltarLinea
+    add	    rsp, 8
     ret
     
 reiniciarIndiceColumna:
-    mov          rdi, caracterConSalto
-    sub          rsi, rsi
-    sub          rax,rax
-    call	 printf
-
-    mov         QWORD[j],0
-    inc         QWORD[i]
-    mov         rax, rbx
-    jmp         inicioCiclo
+    saltarLinea
+    mov     QWORD[iteradorColumna],0
+    inc     QWORD[iteradorFila]
+    mov     rax, rbx
+    jmp     inicioCiclo
     
 printearPieza:
-    mov         rsi,  QWORD[matriz + rbx + 1]
-    jmp         imprimirCasilla
-    
+    mov     rsi, QWORD[matriz + rbx + 1]
+    jmp     imprimirCasilla
