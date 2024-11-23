@@ -23,9 +23,9 @@ section	.data
 			dw	"* ","* ","_ ","_ ","_O","* ","* "       
 			dw	"* ","* ","_O","_ ","_ ","* ","* " 
 
-        i               dd      0 ; para recorrer filas
-        j               dd      0 ; para recorrer columnas
-        indiceActual    dd      0
+        i               dq      0 ; para recorrer filas
+        j               dq      0 ; para recorrer columnas
+        indiceActual    dq      0
 	
 
         LONG_ELEM	equ	2
@@ -41,50 +41,46 @@ section	.data
 section .text
 
 imprimirTablero:
-    ;mov ebp, esp; for correct debugging
     
-    mov		 eax,DWORD[i]	;eax = elemento (4 bytes / dword)									
-    cdqe									
+    sub		 rsp,  8
+    mov          rax, 0  
+    jmp          inicioCiclo
+    
+							
     
 inicioCiclo:
-    cmp          rax, MAX_CASILLAS             
+            
+    cmp          rax, MAX_CASILLAS
     jge          salirCiclo
     
-                                    
-    mov          ebx, [i]                   ; aca carga el indice i 
-    imul         ebx, CANT_COL
-    ; HACERLO  DESDE BX USANDO EL EJEMPLO DE VECTOR
-    add          ebx, DWORD[j]
-    imul         ebx, LONG_ELEM             ; calculo desplazamiento (i * LONG_ELEM)
+    mov          rax, [i]
+    imul         rax, LONG_ELEM
+    ;imul         rax, CANT_COL
     
-    sub		 rsp,8
-    mov          esi, DWORD[matriz + ebx]   ; cargo el char (primer byte del elemento) 
-    mov          rdi, caracterSinSalto  
-    call         printf
-    add          rsp,8
+    mov          rbx, rax
     
-    inc          QWORD[j]
-    cmp          QWORD[j], CANT_COL
-    je           reiniciarIndiceColumna         
-            
-    mov		 eax,ebx	;eax = elemento (4 bytes / dword)									
-    cdqe
+    ;mov          rax, [j]
+    ;imul         rax, LONG_ELEM          
+    ;add		 rbx, rax
     
-    jmp inicioCiclo
+    mov          rdi, caracterSinSalto
+    sub          rsi, rsi
+    mov          rsi,  QWORD[matriz + rbx]
 
+    sub          rax,rax
+    call	 printf
+    
+    
+    inc         QWORD[i]
+    mov         rax, [i]
+    
+    jmp         inicioCiclo
 
 
 
 salirCiclo:
-    
+    add		 rsp,  8
     ret
     
 reiniciarIndiceColumna:
-    mov         DWORD[j],0
-    mov         rdi,caracterConSalto
-    call        printf
-    inc         QWORD[i]
-    mov		eax,ebx	;eax = elemento (4 bytes / dword)									
-    cdqe
-    jmp         inicioCiclo
     
