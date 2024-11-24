@@ -1,4 +1,5 @@
 %include "macrosInputOutput.asm"
+extern  sscanf
 
 global GlobalData
 section .data
@@ -16,3 +17,21 @@ section .data
     MAX_CASILLAS    equ 96
     
     caracterConSalto    db  10,0
+    
+    
+    posFilaOrigen  dq  0 ; inicializamos en 8 para indicar que es posicion invalida
+    posColOrigen   dq  0
+    
+    posFilaDestino dq  0
+    posColDestino  dq  0
+   
+    
+    ;BOOLEANOS   
+    esTurnoSoldados     db  0
+    EligiendoDestino    db  0
+    
+
+
+
+
+    

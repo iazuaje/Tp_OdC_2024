@@ -5,7 +5,7 @@
 ;       siempre tiene que tener dos caracteres. Las piezas validas son 'X' y 'O'. 
 ; Pos:
 ;	- muestra los caracteres de la matriz recibida en 7x7 con las piezas disponibles  
-;       (temporalmente la defino acá, la idea seria que sea definida en program.asm)	
+;       
 ;
 ;***************************************************************************
 extern printf
@@ -107,3 +107,61 @@ salirCiclo:
     print   caracterConSalto, 0
     add	    rsp, 8
     ret
+    
+
+;|| guarda la posicion en el rax    
+esPosicionOrigenValida:
+    ;recorrer matriz
+    sub     rax, rax
+    mov     rax, [posFilaOrigen]       
+    imul    rax, LONG_ELEM
+    imul    rax, CANT_COL
+    
+    mov     rbx, rax
+    
+    mov     rax, [posColOrigen]
+    imul    rax, LONG_ELEM          
+    add     rbx, rax
+    
+    cmp     BYTE[EligiendoDestino],0
+    je      validarPiezaOrigen
+    jmp     validarCasillaDestino     
+    
+validarPiezaOrigen:
+    cmp     BYTE[esTurnoSoldados],0
+    je      validarPiezaOficial
+    jmp     validarPiezaSoldado
+    
+
+        
+validarPiezaSoldado:
+         
+    cmp   BYTE[matriz + rbx + 1], 'X'
+    je    devolverResultadoValido
+    mov   rax, 0
+    ret
+    
+validarPiezaOficial:
+    cmp   BYTE[matriz + rbx + 1], 'O'
+    je    devolverResultadoValido
+    mov   rax, 0
+    ret
+
+devolverResultadoValido:
+    mov   rax, 1
+    ret
+    
+validarCasillaDestino:
+    cmp     BYTE[esTurnoSoldados],0
+    je      validarCasillaParaOficial
+    jmp     validarCasillaParaSoldado
+    
+validarCasillaParaOficial:
+    ;TODO: VALIDACIONES PARA OFICIALES   
+    jmp devolverResultadoValido
+    
+validarCasillaParaSoldado:
+    ;TODO: VALIDACIONES PARA SOLDADOS
+    jmp devolverResultadoValido
+    
+    
