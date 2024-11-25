@@ -33,7 +33,7 @@ section .data
     msjInputError               db  "(ERROR) -- El valor ingresado es invalido, ingrese otro:", 10, 0
     msjJgSoldados               db  "Es el turno de los soldados (X):", 10, 0
     msjJgOficiales              db  "Es el turno de los oficiales (O):", 10, 0
-    msjOrigenInvalido           db  "(ERROR) -- No hay pieza disponible para seleccionar, ingrese otras coordenadas:",10,0
+    msjOrigenInvalido           db  "(ERROR) -- Coordenada invalida, ingrese otras coordenadas:",10,0
     
     formateoInt         db  "%i",0
     
@@ -138,7 +138,7 @@ guardarPosicionColumna:
 guardarPosicionFilaOrigen:
     guardarPosicion posFilaOrigen
     not     byte[EligiendoColumna]
-    jmp     input 
+    jmp     input
     
 guardarPosicionColOrigen:
     guardarPosicion posColOrigen
@@ -147,20 +147,45 @@ guardarPosicionColOrigen:
     
     
 validarPiezaElegida:
-    call    esPosicionOrigenValida
+    call    esPosicionValida
     cmp     rax,0 ; el rax guarda el resultado de la rutina anterior
     je      mostrarOrigenInvalido
     
     not     BYTE[EligiendoDestino]
     cmp     BYTE[EligiendoDestino],0
-    je      main
+    je      moverPieza
     jmp     input     
 
+moverPieza:  
+    sub  rax,rax
+    
+    cmp  BYTE[esTurnoSoldados],0
+    je   cambiarFichaOficial
+    
+    
+    obtenerCaracterIndice posFilaDestino, posColDestino
+    mov BYTE[matriz + rbx + 1], 'X'  
+              
+    obtenerCaracterIndice posFilaOrigen, posColOrigen          
+    mov  BYTE[matriz + rbx +1], ' '
+    
+    jmp main    
+
+cambiarFichaOficial:
+    obtenerCaracterIndice posFilaDestino, posColDestino
+    mov BYTE[matriz + rbx + 1], 'O'  
+              
+    obtenerCaracterIndice posFilaOrigen, posColOrigen          
+    mov  BYTE[matriz + rbx +1], ' '
+    jmp main
+
 inputErroneo:
+    
     print   msjInputError, 0
     jmp     input
     
 mostrarOrigenInvalido:
+    mov     BYTE[EligiendoDestino], 0
     print   msjOrigenInvalido, 0
     jmp     input
 

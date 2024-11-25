@@ -11,6 +11,21 @@
 extern printf
 %include "globalData.asm"
 
+
+%macro obtenerCaracterIndice 2  ; carga el rbx con el indice
+    sub     rax, rax
+    mov     rax, [%1]       
+    imul    rax, LONG_ELEM
+    imul    rax, CANT_COL
+    
+    mov     rbx, rax
+    
+    mov     rax, [%2]
+    imul    rax, LONG_ELEM          
+    add     rbx, rax
+%endmacro
+
+
 section	.data
     iteradorFila        dq  0 ; para recorrer filas
     iteradorColumna     dq  0 ; para recorrer columnas
@@ -21,7 +36,7 @@ section	.data
     
     stringBordeVertical db  '  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■',10,0
     stringNroColumna    db  '  ■   ■ 0 1 2 3 4 5 6 ■',10,0
-
+    
 section .text
 imprimirTablero:
     ;Reiniciamos los iteradores
@@ -53,15 +68,7 @@ printearInicioDeFila:
     jmp     iterarFila1
     
 iterarFila1:
-    mov     rax, [iteradorFila]       
-    imul    rax, LONG_ELEM
-    imul    rax, CANT_COL
-    
-    mov     rbx, rax
-    
-    mov     rax, [iteradorColumna]
-    imul    rax, LONG_ELEM          
-    add     rbx, rax
+    obtenerCaracterIndice iteradorFila,iteradorColumna
     
     mov     rdi, caracterSinSalto
     sub     rsi, rsi
@@ -110,18 +117,9 @@ salirCiclo:
     
 
 ;|| guarda la posicion en el rax    
-esPosicionOrigenValida:
+esPosicionValida:
     ;recorrer matriz
-    sub     rax, rax
-    mov     rax, [posFilaOrigen]       
-    imul    rax, LONG_ELEM
-    imul    rax, CANT_COL
-    
-    mov     rbx, rax
-    
-    mov     rax, [posColOrigen]
-    imul    rax, LONG_ELEM          
-    add     rbx, rax
+    obtenerCaracterIndice posFilaOrigen,posColOrigen
     
     cmp     BYTE[EligiendoDestino],0
     je      validarPiezaOrigen
@@ -144,24 +142,117 @@ validarPiezaSoldado:
 validarPiezaOficial:
     cmp   BYTE[matriz + rbx + 1], 'O'
     je    devolverResultadoValido
-    mov   rax, 0
-    ret
+    jmp   devolverResultadoInvalido
 
 devolverResultadoValido:
     mov   rax, 1
     ret
     
+devolverResultadoInvalido:
+    mov   rax,0
+    ret   
+    
 validarCasillaDestino:
     cmp     BYTE[esTurnoSoldados],0
     je      validarCasillaParaOficial
     jmp     validarCasillaParaSoldado
+ 
+validarCasillaParaSoldado:
     
+    call    estaVacio
+    call    validarDestinoSoldado
+   
+    
+    ;si tienen pared adelante y estan a la derecha se pueden mover a la izquierda ( col + 1 tiene '*', fil = fil y col - 1)
+    ;el soldado solo puede moverse hacia adelante ( fil + 1)
+    ;se pueden mover en diagonal ( fil + 1 y col+1 o col-1)
+    ;idem ( col + 1 tiene '*', fil = fil y col - 1)
+    ;
+    
+    jmp devolverResultadoValido
+
+estaVacio:
+    
+    obtenerCaracterIndice   posFilaDestino, posColDestino
+    cmp   BYTE[matriz + rbx + 1],' '
+    je    volverARutina
+    jmp   mostrarOrigenInvalido
+
+    
+validarDestinoSoldado:
+
+    ;si hay pared al frente entonces si tiene que chequear si la fila es igual y ademas si es a derecha o izquierda
+    
+    ;obtengo si tiene *
+    inc QWORD[posFilaOrigen]
+    obtenerCaracterIndice  posFilaOrigen,posColOrigen
+    dec QWORD[posFilaOrigen]
+    cmp BYTE[matriz + rbx + 1], '*'
+    je  validarDestinoConPared
+    
+    
+    ;validacion fila    
+    mov rax, [posFilaOrigen]
+    mov rbx, [posFilaDestino]
+    inc rax    
+    cmp rax, rbx
+    jne  mostrarOrigenInvalido
+    
+
+    
+    ;validacion columna
+    mov rax, [posColOrigen]
+    mov rbx, [posColDestino]
+    cmp rax, rbx ;valido si es la misma columna
+    je  volverARutina
+    
+    
+    dec rax
+    cmp rax,rbx ; si es col - 1
+    je  volverARutina
+    
+    add rax,2
+    cmp rax,rbx ; si es col + 1
+    je  volverARutina
+    
+    jmp mostrarOrigenInvalido
+      
+validarDestinoConPared:
+    
+    ;validacion fila
+    mov rax, [posFilaOrigen]
+    mov rbx, [posFilaDestino]
+    cmp rax,rbx
+    jne  mostrarOrigenInvalido
+  
+    ;valida movimiento en sector izquierdo
+    mov  rax, [posColOrigen]
+    mov  rbx, [posColDestino]
+    cmp  rax,2
+    jl   validarParaDerecha
+    
+    ;valida movimiento en sector derecho
+    dec rax
+    cmp rax,rbx 
+    je  volverARutina
+    jmp mostrarOrigenInvalido
+
+validarParaDerecha:
+    
+    inc rax             
+    cmp rax,rbx         ;  cmp QWORD[posColOrigen],posColDestino
+    je  volverARutina
+    jmp mostrarOrigenInvalido
+    
+    
+volverARutina:
+    ret
+    
+       
 validarCasillaParaOficial:
     ;TODO: VALIDACIONES PARA OFICIALES   
     jmp devolverResultadoValido
     
-validarCasillaParaSoldado:
-    ;TODO: VALIDACIONES PARA SOLDADOS
-    jmp devolverResultadoValido
+
     
     
