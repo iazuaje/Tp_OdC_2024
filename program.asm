@@ -58,6 +58,7 @@ main:
     je      turnoSoldados
     jmp     turnoOficiales
     
+    
 turnoSoldados:
     ;====================
     print   msjJgSoldados, 0

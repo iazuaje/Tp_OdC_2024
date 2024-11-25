@@ -161,14 +161,6 @@ validarCasillaParaSoldado:
     
     call    estaVacio
     call    validarDestinoSoldado
-   
-    
-    ;si tienen pared adelante y estan a la derecha se pueden mover a la izquierda ( col + 1 tiene '*', fil = fil y col - 1)
-    ;el soldado solo puede moverse hacia adelante ( fil + 1)
-    ;se pueden mover en diagonal ( fil + 1 y col+1 o col-1)
-    ;idem ( col + 1 tiene '*', fil = fil y col - 1)
-    ;
-    
     jmp devolverResultadoValido
 
 estaVacio:
@@ -244,15 +236,145 @@ validarParaDerecha:
     je  volverARutina
     jmp mostrarOrigenInvalido
     
-    
-volverARutina:
-    ret
-    
        
 validarCasillaParaOficial:
     ;TODO: VALIDACIONES PARA OFICIALES   
-    jmp devolverResultadoValido
-    
+    call    estaVacio
+    call    validarDestinoOficial
 
+    jmp     devolverResultadoValido
+    
+validarDestinoOficial:
+    ;movimiento a una casilla de distancia
+    mov rax, [posFilaOrigen]
+    mov rbx, [posFilaDestino]
+    
+    ;========= FILA INFERIOR
+    inc rax
+    cmp rax,rbx
+    je  validarOficialFila
+   
+    ;========= FILA SUPERIOR  
+    sub rax, 2
+    cmp rax,rbx
+    je  validarOficialFila
+    
+    ;========= FILA MEDIO
+    inc rax
+    cmp rax,rbx
+    je validarOficialFilaMedio
+    
+    ;========= FILA INFERIOR + 1
+    add rax, 2
+    cmp rax, rbx
+    je  validarOficialFilaSaltoInferior 
+    
+    ;========= FILA SUPERIOR + 1
+    sub rax, 4
+    cmp rax, rbx
+    je  validarOficialFilaSaltoSuperior
+    
+    
+    jmp mostrarOrigenInvalido
+    
+validarOficialFila:
+    
+    mov rax, [posColOrigen]
+    mov rbx, [posColDestino]
+    
+    ;esquina izquierda
+    dec rax
+    cmp rax,rbx
+    je volverARutina
+    
+    ;misma columna
+    inc rax
+    cmp rax,rbx
+    je volverARutina
+    
+    ;esquina derecha
+    inc rax
+    cmp rax,rbx
+    je volverARutina
+    
+    jmp mostrarOrigenInvalido
+   
+validarOficialFilaMedio:
+    mov rax, [posColOrigen]
+    mov rbx, [posColDestino]
+    mov rcx, [posFilaDestino]
+    
+    dec rax
+    cmp rax,rbx
+    je volverARutina
+    
+    add rax, 2
+    cmp rax,rbx
+    je  volverARutina 
+    
+    ;verificamos las mas lejanas
+    sub rax, 3
+    cmp rax,rbx
+    inc rax
+    je  verificarCondicionSalto
+    
+    add rax, 3
+    cmp rax,rbx
+    dec rax
+    je  verificarCondicionSalto
+    
+   
+validarOficialFilaSaltoInferior:
+   
+   ;verifico lado izquierdo
+   mov rax, [posColOrigen]
+   mov rbx, [posColDestino]
+   mov rcx, [posFilaDestino]
+   dec rcx
+   
+   sub rax,2
+   cmp rax,rbx
+   inc rax
+   je verificarCondicionSalto
+   
+   inc rax
+   cmp rax,rbx
+   je verificarCondicionSalto
+   
+   add rax,2
+   cmp rax,rbx
+   dec rax
+   je verificarCondicionSalto
+   
+validarOficialFilaSaltoSuperior:
+
+   mov rax, [posColOrigen]
+   mov rbx, [posColDestino]
+   mov rcx, [posFilaDestino]
+   inc rcx
+  
+   sub rax,2
+   cmp rax,rbx
+   inc rax
+   je verificarCondicionSalto
+   
+   inc rax
+   cmp rax,rbx
+   je verificarCondicionSalto
+   
+   add rax,2
+   cmp rax,rbx
+   dec rax
+   je verificarCondicionSalto
+
+verificarCondicionSalto:
+
+   obtenerCaracterIndice rcx, rax
+   cmp BYTE[matriz + rbx + 1], 'X'
+   je  volverARutina
+   jmp mostrarOrigenInvalido
+    
+volverARutina:
+    ret
     
     
