@@ -15,7 +15,13 @@ global main
     call    sscanf
     add     rsp,8
     
+%endmacro
 
+%macro macroMatarOficial 0
+    
+    call validarCasillaParaOficial
+    cmp rax,1
+    je  matarOficial
     
 %endmacro
 
@@ -191,28 +197,61 @@ matarSoldado:
 
 validarQueNoTeniaSoldadosAlrededor:
     
-    ;inicializamos los rax,rbx
-        
-  
-    ;chequearSiEraPosibleSalto1.. bla bla
+    mov r8, QWORD[posFilaDestino]
+    mov r9, QWORD[posColDestino]
+    
+    mov rcx, QWORD[posFilaOrigen]
+    mov QWORD[posFilaDestino], rcx
+    
+    mov rcx, QWORD[posColOrigen]
+    mov QWORD[posColDestino], rcx
     
     ;chequear salto izquierdo superior
+    sub QWORD[posFilaDestino],2
+    sub QWORD[posColDestino],2
+    macroMatarOficial
     
     ;chequear salto medio superior
+    add QWORD[posColDestino],2
+    macroMatarOficial
     
     ;chequear salto derecho superior
+    add QWORD[posColDestino],2
+    macroMatarOficial
     
-    ;chequear salto medio izquierdo 
+    ;chequear salto medio izquierdo
+    add QWORD[posFilaDestino],2
+    sub QWORD[posColDestino],4
+    macroMatarOficial
     
     ;chequear salto medio derecho
+    add QWORD[posColDestino],4
+    macroMatarOficial
     
     ;chequear salto izquierdo inferior
+    add QWORD[posFilaDestino],2
+    sub QWORD[posColDestino],4
+    macroMatarOficial
     
     ;chequear salto medio inferior
+    add QWORD[posColDestino],2
+    macroMatarOficial
     
     ;chequear salto derecho inferior
+    add QWORD[posColDestino],4
+    macroMatarOficial
     
     jmp main
+
+matarOficial:
+    
+    mov QWORD[variableAuxiliar1], r8
+    mov QWORD[variableAuxiliar2], r9
+    
+    obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2      
+    mov  BYTE[matriz + rbx +1], ' '
+    jmp main
+
 
 inputErroneo:
     

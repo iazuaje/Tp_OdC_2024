@@ -164,15 +164,20 @@ validarCasillaDestino:
 validarCasillaParaSoldado:
     
     call    estaVacio
+    cmp     rax,0
+    je      devolverResultadoInvalido
     call    validarDestinoSoldado
-    jmp devolverResultadoValido
+    cmp     rax,0
+    je      devolverResultadoInvalido
+    
+    jmp     devolverResultadoValido
 
 estaVacio:
     
     obtenerCaracterIndice   posFilaDestino, posColDestino
     cmp   BYTE[matriz + rbx + 1],' '
     je    volverARutina
-    jmp   mostrarOrigenInvalido
+    jmp   devolverResultadoInvalido
 
     
 validarDestinoSoldado:
@@ -186,15 +191,12 @@ validarDestinoSoldado:
     cmp BYTE[matriz + rbx + 1], '*'
     je  validarDestinoConPared
     
-    
     ;validacion fila    
     mov rax, [posFilaOrigen]
     mov rbx, [posFilaDestino]
     inc rax    
     cmp rax, rbx
-    jne  mostrarOrigenInvalido
-    
-
+    jne  devolverResultadoInvalido
     
     ;validacion columna
     mov rax, [posColOrigen]
@@ -211,7 +213,7 @@ validarDestinoSoldado:
     cmp rax,rbx ; si es col + 1
     je  volverARutina
     
-    jmp mostrarOrigenInvalido
+    jmp devolverResultadoInvalido
       
 validarDestinoConPared:
     
@@ -219,7 +221,7 @@ validarDestinoConPared:
     mov rax, [posFilaOrigen]
     mov rbx, [posFilaDestino]
     cmp rax,rbx
-    jne  mostrarOrigenInvalido
+    jne devolverResultadoInvalido
   
     ;valida movimiento en sector izquierdo
     mov  rax, [posColOrigen]
@@ -231,22 +233,24 @@ validarDestinoConPared:
     dec rax
     cmp rax,rbx 
     je  volverARutina
-    jmp mostrarOrigenInvalido
+    jmp devolverResultadoInvalido
 
 validarParaDerecha:
     
     inc rax             
     cmp rax,rbx         ;  cmp QWORD[posColOrigen],posColDestino
     je  volverARutina
-    jmp mostrarOrigenInvalido
+    jmp devolverResultadoInvalido
     
        
 validarCasillaParaOficial:
-    ;TODO: VALIDACIONES PARA OFICIALES   
+       
     call    estaVacio
+    cmp     rax,0
+    je      devolverResultadoInvalido
     call    validarDestinoOficial
-
-    
+    cmp     rax,0
+    je      devolverResultadoInvalido
     jmp     devolverResultadoValido
     
 validarDestinoOficial:
@@ -284,7 +288,7 @@ validarDestinoOficial:
     je  validarOficialFilaSaltoSuperior
     
     
-    jmp mostrarOrigenInvalido
+    jmp devolverResultadoInvalido
     
 validarOficialFila:
     
@@ -306,7 +310,7 @@ validarOficialFila:
     cmp rax,rbx
     je volverARutina
     
-    jmp mostrarOrigenInvalido
+    jmp devolverResultadoInvalido
    
 validarOficialFilaMedio:
     mov rax, [posColOrigen]
@@ -332,7 +336,7 @@ validarOficialFilaMedio:
     add rax, 4
     cmp rax,rbx
     je  irAVerificacionSaltoDecreciendoRax
-    jmp mostrarOrigenInvalido
+    jmp devolverResultadoInvalido
    
 validarOficialFilaSaltoInferior:
    
@@ -353,7 +357,7 @@ validarOficialFilaSaltoInferior:
    add rax,2
    cmp rax,rbx
    je irAVerificacionSaltoDecreciendoRax
-   jmp mostrarOrigenInvalido
+   jmp devolverResultadoInvalido
    
 validarOficialFilaSaltoSuperior:
 
@@ -376,7 +380,7 @@ validarOficialFilaSaltoSuperior:
    add rax,2
    cmp rax,rbx
    je  irAVerificacionSaltoDecreciendoRax
-   jmp mostrarOrigenInvalido
+   jmp devolverResultadoInvalido
 
 
 irAVerificacionSaltoAumentandoRax:
@@ -400,7 +404,7 @@ verificarCondicionSalto:
 
    cmp BYTE[matriz + rbx + 1], 'X'
    je  volverARutina
-   jmp mostrarOrigenInvalido
+   jmp devolverResultadoInvalido
    
 
 volverARutina:
