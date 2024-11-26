@@ -173,11 +173,45 @@ moverPieza:
     jmp main    
 
 cambiarFichaOficial:
+    
     obtenerCaracterIndice posFilaDestino, posColDestino
     mov BYTE[matriz + rbx + 1], 'O'  
               
     obtenerCaracterIndice posFilaOrigen, posColOrigen          
     mov  BYTE[matriz + rbx +1], ' '
+    
+    cmp QWORD[variableAuxiliar1],255
+    jne  matarSoldado
+    jmp validarQueNoTeniaSoldadosAlrededor
+  
+matarSoldado:
+    obtenerCaracterIndice variableAuxiliar1,variableAuxiliar2
+    mov BYTE[matriz + rbx + 1], ' '   
+    jmp main  
+
+validarQueNoTeniaSoldadosAlrededor:
+    
+    ;inicializamos los rax,rbx
+        
+  
+    ;chequearSiEraPosibleSalto1.. bla bla
+    
+    ;chequear salto izquierdo superior
+    
+    ;chequear salto medio superior
+    
+    ;chequear salto derecho superior
+    
+    ;chequear salto medio izquierdo 
+    
+    ;chequear salto medio derecho
+    
+    ;chequear salto izquierdo inferior
+    
+    ;chequear salto medio inferior
+    
+    ;chequear salto derecho inferior
+    
     jmp main
 
 inputErroneo:

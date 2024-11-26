@@ -37,6 +37,10 @@ section	.data
     stringBordeVertical db  '  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■',10,0
     stringNroColumna    db  '  ■   ■ 0 1 2 3 4 5 6 ■',10,0
     
+    variableAuxiliar1    dq  255
+    variableAuxiliar2    dq  255
+    
+    
 section .text
 imprimirTablero:
     ;Reiniciamos los iteradores
@@ -242,9 +246,14 @@ validarCasillaParaOficial:
     call    estaVacio
     call    validarDestinoOficial
 
+    
     jmp     devolverResultadoValido
     
 validarDestinoOficial:
+    ;reiniciamos las variables auxiliares
+    mov QWORD[variableAuxiliar1],255
+    mov QWORD[variableAuxiliar2],255
+    
     ;movimiento a una casilla de distancia
     mov rax, [posFilaOrigen]
     mov rbx, [posFilaDestino]
@@ -313,16 +322,17 @@ validarOficialFilaMedio:
     je  volverARutina 
     
     ;verificamos las mas lejanas
-    sub rax, 3
-    cmp rax,rbx
-    inc rax
-    je  verificarCondicionSalto
     
-    add rax, 3
+    ;izquierda lejana
+    sub rax,3
     cmp rax,rbx
-    dec rax
-    je  verificarCondicionSalto
+    je  irAVerificacionSaltoAumentandoRax
     
+    ;derecha lejana
+    add rax, 4
+    cmp rax,rbx
+    je  irAVerificacionSaltoDecreciendoRax
+    jmp mostrarOrigenInvalido
    
 validarOficialFilaSaltoInferior:
    
@@ -334,17 +344,16 @@ validarOficialFilaSaltoInferior:
    
    sub rax,2
    cmp rax,rbx
-   inc rax
-   je verificarCondicionSalto
+   je irAVerificacionSaltoAumentandoRax
    
-   inc rax
+   add rax,2
    cmp rax,rbx
    je verificarCondicionSalto
    
    add rax,2
    cmp rax,rbx
-   dec rax
-   je verificarCondicionSalto
+   je irAVerificacionSaltoDecreciendoRax
+   jmp mostrarOrigenInvalido
    
 validarOficialFilaSaltoSuperior:
 
@@ -353,27 +362,47 @@ validarOficialFilaSaltoSuperior:
    mov rcx, [posFilaDestino]
    inc rcx
   
+   ;esquina superior izquierda
    sub rax,2
    cmp rax,rbx
-   inc rax
-   je verificarCondicionSalto
+   je  irAVerificacionSaltoAumentandoRax
    
-   inc rax
+   ;medio
+   add rax, 2
    cmp rax,rbx
-   je verificarCondicionSalto
+   je  verificarCondicionSalto
    
+   ;esquina superior derecha
    add rax,2
    cmp rax,rbx
-   dec rax
-   je verificarCondicionSalto
+   je  irAVerificacionSaltoDecreciendoRax
+   jmp mostrarOrigenInvalido
+
+
+irAVerificacionSaltoAumentandoRax:
+    inc rax
+    jmp verificarCondicionSalto    
+
+irAVerificacionSaltoDecreciendoRax:
+    dec rax
+    jmp verificarCondicionSalto
 
 verificarCondicionSalto:
 
-   obtenerCaracterIndice rcx, rax
+   mov QWORD[variableAuxiliar1],rcx
+   mov QWORD[variableAuxiliar2],rax
+   
+   obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
+   
+   mov rcx, variableAuxiliar1
+   mov rax, variableAuxiliar2
+   
+
    cmp BYTE[matriz + rbx + 1], 'X'
    je  volverARutina
    jmp mostrarOrigenInvalido
-    
+   
+
 volverARutina:
     ret
     
