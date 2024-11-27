@@ -21,6 +21,17 @@
     add     rsp, 8
 %endmacro
 
+%macro guardarPosicion 1
+    mov     rdi, inputJugador
+    mov     rsi, formateoInt
+    mov     rdx, %1
+    
+    sub     rsp, 8
+    sub     rax, rax
+    call    sscanf
+    add     rsp,8
+%endmacro
+
 extern printf
 extern gets
 extern system

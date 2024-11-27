@@ -9,8 +9,6 @@
 ;
 ;***************************************************************************
 extern printf
-%include "globalData.asm"
-
 
 %macro obtenerCaracterIndice 2  ; carga el rbx con el indice
     sub     rax, rax
@@ -133,9 +131,7 @@ validarPiezaOrigen:
     cmp     BYTE[esTurnoSoldados],0
     je      validarPiezaOficial
     jmp     validarPiezaSoldado
-    
-
-        
+     
 validarPiezaSoldado:
          
     cmp   BYTE[matriz + rbx + 1], 'X'
@@ -179,7 +175,6 @@ estaVacio:
     je    volverARutina
     jmp   devolverResultadoInvalido
 
-    
 validarDestinoSoldado:
 
     ;si hay pared al frente entonces si tiene que chequear si la fila es igual y ademas si es a derecha o izquierda
@@ -241,7 +236,6 @@ validarParaDerecha:
     cmp rax,rbx         ;  cmp QWORD[posColOrigen],posColDestino
     je  volverARutina
     jmp devolverResultadoInvalido
-    
        
 validarCasillaParaOficial:
        
@@ -407,7 +401,6 @@ verificarCondicionSalto:
    jmp devolverResultadoInvalido
    
 
-volverARutina:
-    ret
+
     
     
