@@ -6,6 +6,9 @@ section .data
     
     indiceActual           dq 0
     
+    cantidadSoldadosActual db 0
+    
+    MAX_CASILLAS_FORTALEZA equ 6
     
 
 section .text
@@ -329,14 +332,102 @@ seOcupoFortaleza:
     cmp r8,0
     je volverARutina
     
+    ;en realidad estaria bueno chequear todas las posiciones que tengan piso de fortaleza tengan X
+    ;pero eso implica recorrer la matriz y validar cada casilla ocupada. Hasta mientras se usara esto:
+    
+    ;si la torre fue ocupada desde los indices 30,31,32
+                                              ;37,38,39
+                                              ;44,45,46
+    mov r8,0
+    mov rbx,30
+                                                                                      
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+    inc rbx
+    
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+    inc rbx
+    
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+
+    mov rbx,37
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+    inc rbx
+    
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+    inc rbx
+    
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+
+    mov rbx,44
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+    inc rbx
+    
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
+    inc rbx
+    
+    cmp QWORD[matriz + rbx + 1],'X'
+    call validarOcupacionDeSoldado
     
     ret
-    
+
+validarOcupacionDeSoldado:
+    jne continuarJuego  
+    ret
+            
 gananOficiales:
     cmp r8,0
     je volverARutina  ; si ya ganaron los soldados, ni chequeamos y salimos de la rutina
     
+    mov  BYTE[cantidadSoldadosActual],0
+    mov  QWORD[indiceActual],0
+    mov  QWORD[iteradorFila],0
+    mov QWORD[iteradorColumna],0
+    
+    call contarCantidadSoldadosActual
 
     ;not BYTE[GananSoldados]
     ;mov r8,0
     ret
+    
+contarCantidadSoldadosActual:
+    
+    cmp BYTE[cantidadSoldadosActual], 7
+    je continuarJuego ; necesito uno que siosi sea cuando es mayor
+    
+    cmp QWORD[indiceActual], MAX_CASILLAS
+    jge terminarJuegoOficiales
+    
+    obtenerCaracterIndice iteradorFila, iteradorColumna
+    call    verSiHaySoldadoVivo
+    
+    inc     QWORD[iteradorColumna]
+    call    reiniciarIndiceCol
+    
+    cmp     QWORD[indiceActual], MAX_CASILLAS
+    je      contarCantidadSoldadosActual
+    
+    ret
+    
+verSiHaySoldadoVivo:
+    cmp BYTE[matriz + rbx + 1], 'X'
+    je incrementarCantSoldadosVivosActual
+    
+    ret
+    
+incrementarCantSoldadosVivosActual:   
+    inc BYTE[cantidadSoldadosActual]
+    ret
+    
+terminarJuegoOficiales:
+    not BYTE[GananSoldados]
+    mov r8,0
+    ret
+    
