@@ -1,15 +1,18 @@
 %include "macrosInputOutput.asm"
+%include "tablero.asm"
+%include "validacionesEstadoJuego.asm"
+
 extern  sscanf
 
 global GlobalData
 section .data
     matriz  dw	"**","**",".X",".X",".X","**","**"          
             dw	"**","**",".X",".X",".X","**","**"       
-            dw	".X",". ",".X",". ",".X",". ",".X"
-            dw	".X",".X",".X",". ",".X",".X",".X"       
-            dw	".X",". ","_X","_O","_X",". ",".X" 
+            dw	".X",".X",".X",".X",".X",".X",".X"
+            dw	".X",".X",".X",".X",".X",".X",".X"       
+            dw	".X",".X","_X","_O","_X",".X",".X" 
             dw	"**",".X","_X","_X","_X","**","**"       
-            dw	"**",". ","_O","_ ","_ ",". ","**" 
+            dw	"**","**","_ ","_X","_ ","**","**" 
 
     LONG_ELEM       equ 2
     CANT_FIL        equ 7

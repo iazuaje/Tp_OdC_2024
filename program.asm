@@ -1,5 +1,4 @@
-;%include "macrosInputOutput.asm"
-%include "tablero.asm"
+%include "globalData.asm"
 
 global main
 
@@ -40,16 +39,28 @@ section .data
     msjJgSoldados               db  "Es el turno de los soldados (X):", 10, 0
     msjJgOficiales              db  "Es el turno de los oficiales (O):", 10, 0
     msjOrigenInvalido           db  "(ERROR) -- Coordenada invalida, ingrese otras coordenadas:",10,0
+    msjGananSoldados            db  "Fin del Juego - Ganan los soldados",10,0
+    msjGananOficiales           db  "Fin del Juego - Ganan los oficiales",10,0
+    
     
     formateoInt         db  "%i",0
     
     ;BOOLEANOS
     EligiendoColumna    db  0
+    GananSoldados       db  0
 
 
 section .text
 main:
     limpiarPantalla
+    
+    ;====================
+    ;validacion si termina juego
+    call    revisarEstadoJuego
+    cmp     r8,0
+    je      fin
+    mov     r8,1
+    ;====================
     
     ;===================
     print   msjSeparador,0
@@ -64,7 +75,20 @@ main:
     je      turnoSoldados
     jmp     turnoOficiales
     
-    
+;==============================================================
+;=========== REVISAN SI TERMINA JUEGO =========================
+revisarEstadoJuego:
+
+    call gananSoldados
+    call gananOficiales
+
+    ret
+
+;==============================================================
+;==============================================================
+
+
+
 turnoSoldados:
     ;====================
     print   msjJgSoldados, 0
@@ -79,6 +103,7 @@ turnoOficiales:
     
     not     byte[esTurnoSoldados] ;Cambiamos de turno
     jmp     input
+
 
 input:
     cmp     byte[EligiendoColumna], 0
@@ -108,7 +133,7 @@ inputColumna:
 input1:
     get     inputJugador
     cmp     byte[inputJugador], "p"
-    je      fin
+    je      volverARutina
     jmp     validarInput
 
 validarInput:
@@ -264,4 +289,13 @@ mostrarOrigenInvalido:
     jmp     input
 
 fin:
+    cmp BYTE[GananSoldados],0
+    je  mostrarFinDeJuegoSoldados
+    
+    print msjGananOficiales,0
+    ret
+    
+    
+mostrarFinDeJuegoSoldados:
+    print msjGananSoldados,0
     ret

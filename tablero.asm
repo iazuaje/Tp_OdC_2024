@@ -9,7 +9,6 @@
 ;
 ;***************************************************************************
 extern printf
-%include "globalData.asm"
 
 
 %macro obtenerCaracterIndice 2  ; carga el rbx con el indice
