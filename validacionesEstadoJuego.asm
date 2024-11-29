@@ -8,7 +8,7 @@ section .data
     
     cantidadSoldadosActual db 0
     
-    MAX_CASILLAS_FORTALEZA equ 6
+    MAX_CASILLAS_FORTALEZA equ 8
     
 
 section .text
@@ -24,10 +24,12 @@ sePuedenMoverOficiales:
     
     mov QWORD[iteradorFila],0
     mov QWORD[iteradorColumna],0
+    mov QWORD[vecIterador], 0
+    call reiniciarVectorPosOficiales
     
     call obtenerPosicionesOficiales
     call revisarOficialesObtenidos 
-    mov QWORD[vecIterador],0
+    ;mov QWORD[vecIterador],0
 
 _sePuedenMoverOficiales:
     cmp r8,0
@@ -76,11 +78,11 @@ verificarSiHayMovimientosDisponibles:
     
     ;fila inferior + 1
     inc QWORD[variableAuxiliar1]
-    call verificarFilaSuperiorConSalto
+    call verificarFilaInferiorConSalto
     
     ;fila superior - 1
     sub QWORD[variableAuxiliar1],4
-    call verificarFilaInferiorConSalto
+    call verificarFilaSuperiorConSalto
     
     ret    
     
@@ -154,71 +156,73 @@ verificarEspacioVacioPorIzquierda:
     ret
     
 verificarFilaSuperiorConSalto:
-    mov r10, QWORD[variableAuxiliar1]
-    mov r11, QWORD[variableAuxiliar2]
+    mov r10, QWORD[variableAuxiliar1]; 2
+    mov r11, QWORD[variableAuxiliar2]; 3 
     
     ;chequeo por izquierda
-    inc QWORD[variableAuxiliar1]
-    inc QWORD[variableAuxiliar2]
+    inc QWORD[variableAuxiliar1] ; 3
+    dec QWORD[variableAuxiliar2] ; 2
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp   BYTE[matriz + rbx + 1],'X'
-    jne   volverARutina
+    jne   volverARutina 
     
-    mov  QWORD[variableAuxiliar1],r10
-    mov  QWORD[variableAuxiliar2],r11
+    dec QWORD[variableAuxiliar1] ; 2
+    dec QWORD[variableAuxiliar2] ; 1
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp  BYTE[matriz + rbx + 1], ' '
     je   continuarJuego
     
     ;chequeo por medio
-    add QWORD[variableAuxiliar2],2
-    inc QWORD[variableAuxiliar1]
+    add QWORD[variableAuxiliar2],2 ; 3
+    inc QWORD[variableAuxiliar1]   ; 3
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp   BYTE[matriz + rbx + 1],'X'
     jne   volverARutina    
-    dec QWORD[variableAuxiliar1]
+    
+    dec QWORD[variableAuxiliar1] ; 2
+    
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp  BYTE[matriz + rbx + 1], ' '
     je   continuarJuego
     
     ;chequeo por derecha
-    inc QWORD[variableAuxiliar2]
-    inc QWORD[variableAuxiliar1]
+    inc QWORD[variableAuxiliar1] ; 3
+    inc QWORD[variableAuxiliar2] ; 4
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp   BYTE[matriz + rbx + 1],'X'
     jne   volverARutina    
     
-    dec QWORD[variableAuxiliar1]
-    inc QWORD[variableAuxiliar2]
+    dec QWORD[variableAuxiliar1] ; 2
+    inc QWORD[variableAuxiliar2] ; 5
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp  BYTE[matriz + rbx + 1], ' '
     je   continuarJuego
     
-    mov QWORD[variableAuxiliar1],r10
-    mov QWORD[variableAuxiliar2],r11
+    mov QWORD[variableAuxiliar1],r10 ; 6
+    mov QWORD[variableAuxiliar2],r11 ; 3
     
     ret   
     
 verificarFilaInferiorConSalto:
 
-    mov r10, QWORD[variableAuxiliar1]
-    mov r11, QWORD[variableAuxiliar2]
+    mov r10, QWORD[variableAuxiliar1] ; 6
+    mov r11, QWORD[variableAuxiliar2] ; 3
     
     ;chequeo por izquierda
-    dec QWORD[variableAuxiliar1]
-    inc QWORD[variableAuxiliar2]
+    dec QWORD[variableAuxiliar1] ; 5
+    dec QWORD[variableAuxiliar2] ; 2
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp   BYTE[matriz + rbx + 1],'X'
     jne   volverARutina
     
-    mov  QWORD[variableAuxiliar1],r10
-    mov  QWORD[variableAuxiliar2],r11
+    inc QWORD[variableAuxiliar1]
+    dec QWORD[variableAuxiliar2] 
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
     cmp  BYTE[matriz + rbx + 1], ' '
@@ -251,8 +255,8 @@ verificarFilaInferiorConSalto:
     cmp  BYTE[matriz + rbx + 1], ' '
     je   continuarJuego
     
-    mov QWORD[variableAuxiliar1],r10
-    mov QWORD[variableAuxiliar2],r11
+    mov QWORD[variableAuxiliar1],r10 ; 6
+    mov QWORD[variableAuxiliar2],r11 ; 3
     
     ret   
     
@@ -270,8 +274,7 @@ _terminarJuego:
     mov r8,0
     ret    
    
-obtenerPosicionesOficiales:
-    
+obtenerPosicionesOficiales:    
     cmp QWORD[vecIterador],TAMANIO_VECTOR
     jge volverARutina
     
@@ -307,8 +310,6 @@ guardarPosicionOficial:
     ret
     
 _guardarPosicionOficial:
-
-    
     mov rbx, QWORD[vecIterador]
     mov rcx, QWORD[iteradorFila]
     imul rbx,8
@@ -335,45 +336,45 @@ seOcupoFortaleza:
     ;en realidad estaria bueno chequear todas las posiciones que tengan piso de fortaleza tengan X
     ;pero eso implica recorrer la matriz y validar cada casilla ocupada. Hasta mientras se usara esto:
     
-    ;si la torre fue ocupada desde los indices 30,31,32
-                                              ;37,38,39
-                                              ;44,45,46
+    ;si la torre fue ocupada desde los indices 60,62,64
+                                              ;74,76,78
+                                              ;88,90,92
     mov r8,0
-    mov rbx,30
+    mov rbx,60
                                                                                       
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
-    inc rbx
+    add rbx, 2
     
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
-    inc rbx
+    add rbx, 2
     
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
 
-    mov rbx,37
-    cmp QWORD[matriz + rbx + 1],'X'
+    mov rbx,74
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
-    inc rbx
+    add rbx, 2
     
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
-    inc rbx
+    add rbx, 2
     
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
 
-    mov rbx,44
-    cmp QWORD[matriz + rbx + 1],'X'
+    mov rbx,88
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
-    inc rbx
+    add rbx, 2
     
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
-    inc rbx
+    add rbx, 2
     
-    cmp QWORD[matriz + rbx + 1],'X'
+    cmp BYTE[matriz + rbx + 1],'X'
     call validarOcupacionDeSoldado
     
     ret
@@ -381,7 +382,23 @@ seOcupoFortaleza:
 validarOcupacionDeSoldado:
     jne continuarJuego  
     ret
-            
+
+reiniciarVectorPosOficiales:
+    mov QWORD[vecIterador], 0
+
+_reiniciarVectorPosOficiales:
+    mov rbx, QWORD[vecIterador]
+    imul rbx, 8
+    
+    mov QWORD[vecPosicionesOficiales + rbx], 8
+    inc QWORD[vecIterador]
+    
+    cmp QWORD[vecIterador], TAMANIO_VECTOR
+    jl _reiniciarVectorPosOficiales
+    
+    mov QWORD[vecIterador], 0
+    ret
+
 gananOficiales:
     cmp r8,0
     je volverARutina  ; si ya ganaron los soldados, ni chequeamos y salimos de la rutina
@@ -399,8 +416,8 @@ gananOficiales:
     
 contarCantidadSoldadosActual:
     
-    cmp BYTE[cantidadSoldadosActual], 7
-    je continuarJuego ; necesito uno que siosi sea cuando es mayor
+    cmp BYTE[cantidadSoldadosActual], MAX_CASILLAS_FORTALEZA
+    jg continuarJuego ; necesito uno que siosi sea cuando es mayor
     
     cmp QWORD[indiceActual], MAX_CASILLAS
     jge terminarJuegoOficiales
@@ -412,7 +429,7 @@ contarCantidadSoldadosActual:
     call    reiniciarIndiceCol
     
     cmp     QWORD[indiceActual], MAX_CASILLAS
-    je      contarCantidadSoldadosActual
+    jle     contarCantidadSoldadosActual
     
     ret
     

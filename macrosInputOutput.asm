@@ -1,7 +1,7 @@
 %macro print 2
     mov     rax, 0 ; Limpiamos el rax para evitar errores
     mov     rdi, %1
-    mov     rsi, %2
+    mov     rsi, %2 ; SE USA UNA UNICA VEZ EN TODO EL PROGRAMA.
     sub     rsp, 8
     call    printf
     add     rsp, 8

@@ -2,6 +2,14 @@
 
 global main
 
+%macro imprimirTableroMacro 0
+    print   msjSeparador,0
+    print   msjTitulo,0
+    print   msjSeparador,0
+    print   caracterConSalto,0
+    call    imprimirTablero
+    print   msjSeparador,0
+%endmacro
 
 %macro guardarPosicion 1
 
@@ -25,7 +33,8 @@ global main
 %endmacro
 
 section .bss
-    inputJugador        resb 1
+    inputJugador        resb 2
+    buffer              resq 128 ; Un kilobyte de buffer
     
 section .data
     ;MENSAJES
@@ -63,12 +72,7 @@ main:
     ;====================
     
     ;===================
-    print   msjSeparador,0
-    print   msjTitulo,0
-    print   msjSeparador,0
-    print   caracterConSalto,0
-    call    imprimirTablero
-    print   msjSeparador,0
+    imprimirTableroMacro
     ;====================
     
     cmp     byte[esTurnoSoldados], 0
@@ -289,13 +293,22 @@ mostrarOrigenInvalido:
     jmp     input
 
 fin:
+    imprimirTableroMacro
     cmp BYTE[GananSoldados],0
     je  mostrarFinDeJuegoSoldados
     
-    print msjGananOficiales,0
+    print caracterConSalto, 0
+    print msjSeparador, 0
+    print msjGananOficiales, 0
+    print msjSeparador, 0
+    
     ret
     
     
 mostrarFinDeJuegoSoldados:
-    print msjGananSoldados,0
+    print caracterConSalto, 0
+    print msjSeparador, 0
+    print msjGananSoldados, 0
+    print msjSeparador, 0
+    
     ret

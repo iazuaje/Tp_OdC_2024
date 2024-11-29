@@ -6,13 +6,17 @@ extern  sscanf
 
 global GlobalData
 section .data
+
+    padding dw 0
+    
     matriz  dw	"**","**",".X",".X",".X","**","**"          
             dw	"**","**",".X",".X",".X","**","**"       
             dw	".X",".X",".X",".X",".X",".X",".X"
             dw	".X",".X",".X",".X",".X",".X",".X"       
-            dw	".X",".X","_X","_O","_X",".X",".X" 
-            dw	"**",".X","_X","_X","_X","**","**"       
-            dw	"**","**","_ ","_X","_ ","**","**" 
+            dw	".X",".X","_ ","_ ","_ ",".X",".X" 
+            dw	"**","**","_ ","_ ","_O","**","**"       
+            dw	"**","**","_O","_ ","_ ","**","**",
+            dw   00 ; padding
 
     LONG_ELEM       equ 2
     CANT_FIL        equ 7
