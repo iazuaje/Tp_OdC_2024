@@ -8,37 +8,19 @@
 ;       
 ;
 ;***************************************************************************
-extern printf
-
-
-%macro obtenerCaracterIndice 2  ; carga el rbx con el indice
-    sub     rax, rax
-    mov     rax, [%1]       
-    imul    rax, LONG_ELEM
-    imul    rax, CANT_COL
-    
-    mov     rbx, rax
-    
-    mov     rax, [%2]
-    imul    rax, LONG_ELEM          
-    add     rbx, rax
-%endmacro
-
-
 section	.data
-    iteradorFila        dq  0 ; para recorrer filas
-    iteradorColumna     dq  0 ; para recorrer columnas
+    iteradorFila         dq  0 ; para recorrer filas
+    iteradorColumna      dq  0 ; para recorrer columnas
 	
-    caracterSinSalto    db  ' %c', 0
-    caracterNumerico    db  '  ■ %i', 0
-    caracterBorde       db  ' ■', 0
+    caracterSinSalto     db  ' %c', 0
+    caracterNumerico     db  '  ■ %i', 0
+    caracterBorde        db  ' ■', 0
     
-    stringBordeVertical db  '  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■',10,0
-    stringNroColumna    db  '  ■   ■ 0 1 2 3 4 5 6 ■',10,0
+    stringBordeVertical  db  '  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■',10,0
+    stringNroColumna     db  '  ■   ■ 0 1 2 3 4 5 6 ■',10,0
     
     variableAuxiliar1    dq  255
     variableAuxiliar2    dq  255
-    
     
 section .text
 imprimirTablero:
@@ -59,6 +41,12 @@ cicloPrintTablero:
     cmp     rax, MAX_CASILLAS
     jge     salirCiclo
     jmp     iterarFila
+    
+salirCiclo:
+    print   stringBordeVertical, 0
+    print   caracterConSalto, 0
+    add	    rsp, 8
+    ret
 
 iterarFila:
     cmp     QWORD[iteradorColumna], 0 ; Nos fijamos si estamos al principio de la fila
@@ -112,14 +100,6 @@ reiniciarIndiceColumna:
     mov     rax, rbx
     jmp     cicloPrintTablero
     
-salirCiclo:
-    print   stringBordeVertical, 0
-    print   caracterConSalto, 0
-    add	    rsp, 8
-    ret
-    
-
-;|| guarda la posicion en el rax    
 esPosicionValida:
     ;recorrer matriz
     obtenerCaracterIndice posFilaOrigen,posColOrigen
@@ -132,27 +112,24 @@ validarPiezaOrigen:
     cmp     BYTE[esTurnoSoldados],0
     je      validarPiezaOficial
     jmp     validarPiezaSoldado
-    
-
-        
-validarPiezaSoldado:
-         
-    cmp   BYTE[matriz + rbx + 1], 'X'
-    je    devolverResultadoValido
-    mov   rax, 0
+      
+validarPiezaSoldado:   
+    cmp     BYTE[matriz + rbx + 1], 'X'
+    je      devolverResultadoValido
+    mov     rax, 0
     ret
     
 validarPiezaOficial:
-    cmp   BYTE[matriz + rbx + 1], 'O'
-    je    devolverResultadoValido
-    jmp   devolverResultadoInvalido
+    cmp     BYTE[matriz + rbx + 1], 'O'
+    je      devolverResultadoValido
+    jmp     devolverResultadoInvalido
 
 devolverResultadoValido:
-    mov   rax, 1
+    mov     rax, 1
     ret
     
 devolverResultadoInvalido:
-    mov   rax,0
+    mov     rax,0
     ret   
     
 validarCasillaDestino:
@@ -161,7 +138,6 @@ validarCasillaDestino:
     jmp     validarCasillaParaSoldado
  
 validarCasillaParaSoldado:
-    
     call    estaVacio
     cmp     rax,0
     je      devolverResultadoInvalido
@@ -172,78 +148,71 @@ validarCasillaParaSoldado:
     jmp     devolverResultadoValido
 
 estaVacio:
-    
     obtenerCaracterIndice   posFilaDestino, posColDestino
-    cmp   BYTE[matriz + rbx + 1],' '
-    je    volverARutina
-    jmp   devolverResultadoInvalido
+    cmp     BYTE[matriz + rbx + 1],' '
+    je      volverARutina
+    jmp     devolverResultadoInvalido
 
     
 validarDestinoSoldado:
-
     ;si hay pared al frente entonces si tiene que chequear si la fila es igual y ademas si es a derecha o izquierda
-    
     ;obtengo si tiene *
-    inc QWORD[posFilaOrigen]
+    inc     QWORD[posFilaOrigen]
     obtenerCaracterIndice  posFilaOrigen,posColOrigen
-    dec QWORD[posFilaOrigen]
-    cmp BYTE[matriz + rbx + 1], '*'
-    je  validarDestinoConPared
+    dec     QWORD[posFilaOrigen]
+    cmp     BYTE[matriz + rbx + 1], '*'
+    je      validarDestinoConPared
     
     ;validacion fila    
-    mov rax, [posFilaOrigen]
-    mov rbx, [posFilaDestino]
-    inc rax    
-    cmp rax, rbx
-    jne  devolverResultadoInvalido
+    mov     rax, [posFilaOrigen]
+    mov     rbx, [posFilaDestino]
+    inc     rax    
+    cmp     rax, rbx
+    jne     devolverResultadoInvalido
     
     ;validacion columna
-    mov rax, [posColOrigen]
-    mov rbx, [posColDestino]
-    cmp rax, rbx ;valido si es la misma columna
-    je  volverARutina
+    mov     rax, [posColOrigen]
+    mov     rbx, [posColDestino]
+    cmp     rax, rbx ;valido si es la misma columna
+    je      volverARutina
     
+    dec     rax
+    cmp     rax,rbx ; si es col - 1
+    je      volverARutina
     
-    dec rax
-    cmp rax,rbx ; si es col - 1
-    je  volverARutina
+    add     rax,2
+    cmp     rax,rbx ; si es col + 1
+    je      volverARutina
     
-    add rax,2
-    cmp rax,rbx ; si es col + 1
-    je  volverARutina
-    
-    jmp devolverResultadoInvalido
+    jmp     devolverResultadoInvalido
       
 validarDestinoConPared:
-    
     ;validacion fila
-    mov rax, [posFilaOrigen]
-    mov rbx, [posFilaDestino]
-    cmp rax,rbx
-    jne devolverResultadoInvalido
+    mov     rax, [posFilaOrigen]
+    mov     rbx, [posFilaDestino]
+    cmp     rax,rbx
+    jne     devolverResultadoInvalido
   
     ;valida movimiento en sector izquierdo
-    mov  rax, [posColOrigen]
-    mov  rbx, [posColDestino]
-    cmp  rax,2
-    jl   validarParaDerecha
+    mov     rax, [posColOrigen]
+    mov     rbx, [posColDestino]
+    cmp     rax,2
+    jl      validarParaDerecha
     
     ;valida movimiento en sector derecho
-    dec rax
-    cmp rax,rbx 
-    je  volverARutina
-    jmp devolverResultadoInvalido
+    dec     rax
+    cmp     rax,rbx 
+    je      volverARutina
+    jmp     devolverResultadoInvalido
 
 validarParaDerecha:
-    
-    inc rax             
-    cmp rax,rbx         ;  cmp QWORD[posColOrigen],posColDestino
-    je  volverARutina
-    jmp devolverResultadoInvalido
+    inc     rax             
+    cmp     rax,rbx  
+    je      volverARutina
+    jmp     devolverResultadoInvalido
     
        
 validarCasillaParaOficial:
-       
     call    estaVacio
     cmp     rax,0
     je      devolverResultadoInvalido
@@ -254,159 +223,146 @@ validarCasillaParaOficial:
     
 validarDestinoOficial:
     ;reiniciamos las variables auxiliares
-    mov QWORD[variableAuxiliar1],255
-    mov QWORD[variableAuxiliar2],255
+    mov     QWORD[variableAuxiliar1],255
+    mov     QWORD[variableAuxiliar2],255
     
     ;movimiento a una casilla de distancia
-    mov rax, [posFilaOrigen]
-    mov rbx, [posFilaDestino]
+    mov     rax, [posFilaOrigen]
+    mov     rbx, [posFilaDestino]
     
     ;========= FILA INFERIOR
-    inc rax
-    cmp rax,rbx
-    je  validarOficialFila
+    inc     rax
+    cmp     rax,rbx
+    je      validarOficialFila
    
     ;========= FILA SUPERIOR  
-    sub rax, 2
-    cmp rax,rbx
-    je  validarOficialFila
+    sub     rax, 2
+    cmp     rax,rbx
+    je      validarOficialFila
     
     ;========= FILA MEDIO
-    inc rax
-    cmp rax,rbx
-    je validarOficialFilaMedio
+    inc     rax
+    cmp     rax,rbx
+    je      validarOficialFilaMedio
     
     ;========= FILA INFERIOR + 1
-    add rax, 2
-    cmp rax, rbx
-    je  validarOficialFilaSaltoInferior 
+    add     rax, 2
+    cmp     rax, rbx
+    je      validarOficialFilaSaltoInferior 
     
     ;========= FILA SUPERIOR + 1
-    sub rax, 4
-    cmp rax, rbx
-    je  validarOficialFilaSaltoSuperior
+    sub     rax, 4
+    cmp     rax, rbx
+    je      validarOficialFilaSaltoSuperior
     
-    
-    jmp devolverResultadoInvalido
+    jmp     devolverResultadoInvalido
     
 validarOficialFila:
-    
-    mov rax, [posColOrigen]
-    mov rbx, [posColDestino]
+    mov     rax, [posColOrigen]
+    mov     rbx, [posColDestino]
     
     ;esquina izquierda
-    dec rax
-    cmp rax,rbx
-    je volverARutina
+    dec     rax
+    cmp     rax,rbx
+    je      volverARutina
     
     ;misma columna
-    inc rax
-    cmp rax,rbx
-    je volverARutina
+    inc     rax
+    cmp     rax,rbx
+    je      volverARutina
     
     ;esquina derecha
-    inc rax
-    cmp rax,rbx
-    je volverARutina
+    inc     rax
+    cmp     rax,rbx
+    je      volverARutina
     
-    jmp devolverResultadoInvalido
+    jmp     devolverResultadoInvalido
    
 validarOficialFilaMedio:
-    mov rax, [posColOrigen]
-    mov rbx, [posColDestino]
-    mov rcx, [posFilaDestino]
+    mov     rax, [posColOrigen]
+    mov     rbx, [posColDestino]
+    mov     rcx, [posFilaDestino]
     
-    dec rax
-    cmp rax,rbx
-    je volverARutina
+    dec     rax
+    cmp     rax,rbx
+    je      volverARutina
     
-    add rax, 2
-    cmp rax,rbx
-    je  volverARutina 
+    add     rax, 2
+    cmp     rax,rbx
+    je      volverARutina 
     
     ;verificamos las mas lejanas
     
     ;izquierda lejana
-    sub rax,3
-    cmp rax,rbx
-    je  irAVerificacionSaltoAumentandoRax
+    sub     rax,3
+    cmp     rax,rbx
+    je      irAVerificacionSaltoAumentandoRax
     
     ;derecha lejana
-    add rax, 4
-    cmp rax,rbx
-    je  irAVerificacionSaltoDecreciendoRax
-    jmp devolverResultadoInvalido
+    add     rax, 4
+    cmp     rax,rbx
+    je      irAVerificacionSaltoDecreciendoRax
+    jmp     devolverResultadoInvalido
    
 validarOficialFilaSaltoInferior:
-   
    ;verifico lado izquierdo
-   mov rax, [posColOrigen]
-   mov rbx, [posColDestino]
-   mov rcx, [posFilaDestino]
-   dec rcx
+   mov      rax, [posColOrigen]
+   mov      rbx, [posColDestino]
+   mov      rcx, [posFilaDestino]
+   dec      rcx
    
-   sub rax,2
-   cmp rax,rbx
-   je irAVerificacionSaltoAumentandoRax
+   sub      rax,2
+   cmp      rax,rbx
+   je       irAVerificacionSaltoAumentandoRax
    
-   add rax,2
-   cmp rax,rbx
-   je verificarCondicionSalto
+   add      rax,2
+   cmp      rax,rbx
+   je       verificarCondicionSalto
    
-   add rax,2
-   cmp rax,rbx
-   je irAVerificacionSaltoDecreciendoRax
-   jmp devolverResultadoInvalido
+   add      rax,2
+   cmp      rax,rbx
+   je       irAVerificacionSaltoDecreciendoRax
+   jmp      devolverResultadoInvalido
    
 validarOficialFilaSaltoSuperior:
-
-   mov rax, [posColOrigen]
-   mov rbx, [posColDestino]
-   mov rcx, [posFilaDestino]
-   inc rcx
+   mov      rax, [posColOrigen]
+   mov      rbx, [posColDestino]
+   mov      rcx, [posFilaDestino]
+   inc      rcx
   
    ;esquina superior izquierda
-   sub rax,2
-   cmp rax,rbx
-   je  irAVerificacionSaltoAumentandoRax
+   sub      rax,2
+   cmp      rax,rbx
+   je       irAVerificacionSaltoAumentandoRax
    
    ;medio
-   add rax, 2
-   cmp rax,rbx
-   je  verificarCondicionSalto
+   add      rax, 2
+   cmp      rax,rbx
+   je       verificarCondicionSalto
    
    ;esquina superior derecha
-   add rax,2
-   cmp rax,rbx
-   je  irAVerificacionSaltoDecreciendoRax
-   jmp devolverResultadoInvalido
-
+   add      rax,2
+   cmp      rax,rbx
+   je       irAVerificacionSaltoDecreciendoRax
+   jmp      devolverResultadoInvalido
 
 irAVerificacionSaltoAumentandoRax:
-    inc rax
-    jmp verificarCondicionSalto    
+    inc     rax
+    jmp     verificarCondicionSalto    
 
 irAVerificacionSaltoDecreciendoRax:
-    dec rax
-    jmp verificarCondicionSalto
+    dec     rax
+    jmp     verificarCondicionSalto
 
 verificarCondicionSalto:
-
-   mov QWORD[variableAuxiliar1],rcx
-   mov QWORD[variableAuxiliar2],rax
+   mov      QWORD[variableAuxiliar1],rcx
+   mov      QWORD[variableAuxiliar2],rax
    
    obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2
    
-   mov rcx, variableAuxiliar1
-   mov rax, variableAuxiliar2
+   mov      rcx, variableAuxiliar1
+   mov      rax, variableAuxiliar2
    
-
-   cmp BYTE[matriz + rbx + 1], 'X'
-   je  volverARutina
-   jmp devolverResultadoInvalido
-   
-
-volverARutina:
-    ret
-    
-    
+   cmp      BYTE[matriz + rbx + 1], 'X'
+   je       volverARutina
+   jmp      devolverResultadoInvalido

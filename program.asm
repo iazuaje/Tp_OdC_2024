@@ -1,68 +1,21 @@
-%include "globalData.asm"
+%include "src/globalData.asm"
 
 global main
 
-%macro imprimirTableroMacro 0
-    print   msjSeparador,0
-    print   msjTitulo,0
-    print   msjSeparador,0
-    print   caracterConSalto,0
-    call    imprimirTablero
-    print   msjSeparador,0
-%endmacro
-
-%macro guardarPosicion 1
-
-    mov     rdi, inputJugador
-    mov     rsi, formateoInt
-    mov     rdx, %1
-    
-    sub     rsp, 8
-    sub     rax, rax
-    call    sscanf
-    add     rsp,8
-    
-%endmacro
-
-%macro macroMatarOficial 0
-    
-    call validarCasillaParaOficial
-    cmp rax,1
-    je  matarOficial
-    
-%endmacro
 
 section .bss
     inputJugador        resb 2
     buffer              resq 128 ; Un kilobyte de buffer
     
 section .data
-    ;MENSAJES
-    msjSeparador                db  "====================================",10,0
-    msjTitulo                   db  "=            EL ASALTO             =",10,0
-    msjInputFila                db  "Ingrese la fila de la pieza que desea mover: ", 0
-    msjInputColumna             db  "Ingrese la columna de la pieza que desea mover: ", 0
-    msjInputFilaDestino         db  "Ingrese la fila de la ubicacion a la que desea moverse: ", 0
-    msjInputColumnaDestino      db  "Ingrese la columna de la ubicacion a la que desea moverse: ", 0
-    msjInputError               db  "(ERROR) -- El valor ingresado es invalido, ingrese otro:", 10, 0
-    msjJgSoldados               db  "Es el turno de los soldados (X):", 10, 0
-    msjJgOficiales              db  "Es el turno de los oficiales (O):", 10, 0
-    msjOrigenInvalido           db  "(ERROR) -- Coordenada invalida, ingrese otras coordenadas:",10,0
-    msjGananSoldados            db  "Fin del Juego - Ganan los soldados",10,0
-    msjGananOficiales           db  "Fin del Juego - Ganan los oficiales",10,0
-    
-    
     formateoInt         db  "%i",0
-    
     ;BOOLEANOS
     EligiendoColumna    db  0
     GananSoldados       db  0
 
-
 section .text
 main:
     limpiarPantalla
-    
     ;====================
     ;validacion si termina juego
     call    revisarEstadoJuego
@@ -70,8 +23,6 @@ main:
     je      fin
     mov     r8,1
     ;====================
-    
-    ;===================
     imprimirTableroMacro
     ;====================
     
@@ -82,17 +33,12 @@ main:
 ;==============================================================
 ;=========== REVISAN SI TERMINA JUEGO =========================
 revisarEstadoJuego:
-
-    call gananSoldados
-    call gananOficiales
+    call    gananSoldados
+    call    gananOficiales
 
     ret
-
 ;==============================================================
 ;==============================================================
-
-
-
 turnoSoldados:
     ;====================
     print   msjJgSoldados, 0
@@ -107,7 +53,6 @@ turnoOficiales:
     
     not     byte[esTurnoSoldados] ;Cambiamos de turno
     jmp     input
-
 
 input:
     cmp     byte[EligiendoColumna], 0
@@ -130,7 +75,7 @@ inputColumnaOrigen:
 
 inputColumna:
     cmp     byte[EligiendoDestino],0
-    je     inputColumnaOrigen
+    je      inputColumnaOrigen
     print   msjInputColumnaDestino, 0
     jmp     input1
     
@@ -153,7 +98,6 @@ validarInput1:
     cmp     byte[EligiendoColumna], 0
     je      guardarPosicionFila
     jmp     guardarPosicionColumna
-    
     
 guardarPosicionFila:
     cmp     byte[EligiendoDestino], 0
@@ -181,7 +125,6 @@ guardarPosicionColOrigen:
     not     byte[EligiendoColumna]
     jmp     validarPiezaElegida
     
-    
 validarPiezaElegida:
     call    esPosicionValida
     cmp     rax,0 ; el rax guarda el resultado de la rutina anterior
@@ -193,55 +136,54 @@ validarPiezaElegida:
     jmp     input     
 
 moverPieza:  
-    sub  rax,rax
+    sub     rax,rax
     
-    cmp  BYTE[esTurnoSoldados],0
-    je   cambiarFichaOficial
+    cmp     BYTE[esTurnoSoldados],0
+    je      cambiarFichaOficial
     
     
     obtenerCaracterIndice posFilaDestino, posColDestino
-    mov BYTE[matriz + rbx + 1], 'X'  
+    mov     BYTE[matriz + rbx + 1], 'X'  
               
     obtenerCaracterIndice posFilaOrigen, posColOrigen          
-    mov  BYTE[matriz + rbx +1], ' '
+    mov     BYTE[matriz + rbx +1], ' '
     
-    jmp main    
+    jmp     main    
 
 cambiarFichaOficial:
     
     obtenerCaracterIndice posFilaDestino, posColDestino
-    mov BYTE[matriz + rbx + 1], 'O'  
+    mov     BYTE[matriz + rbx + 1], 'O'  
               
     obtenerCaracterIndice posFilaOrigen, posColOrigen          
-    mov  BYTE[matriz + rbx +1], ' '
+    mov     BYTE[matriz + rbx +1], ' '
     
-    cmp QWORD[variableAuxiliar1],255
-    jne  matarSoldado
-    jmp validarQueNoTeniaSoldadosAlrededor
+    cmp     QWORD[variableAuxiliar1],255
+    jne     matarSoldado
+    jmp     validarQueNoTeniaSoldadosAlrededor
   
 matarSoldado:
     obtenerCaracterIndice variableAuxiliar1,variableAuxiliar2
-    mov BYTE[matriz + rbx + 1], ' '   
-    jmp main  
+    mov     BYTE[matriz + rbx + 1], ' '   
+    jmp     main  
 
 validarQueNoTeniaSoldadosAlrededor:
+    mov     r8, QWORD[posFilaDestino]
+    mov     r9, QWORD[posColDestino]
     
-    mov r8, QWORD[posFilaDestino]
-    mov r9, QWORD[posColDestino]
+    mov     rcx, QWORD[posFilaOrigen]
+    mov     QWORD[posFilaDestino], rcx
     
-    mov rcx, QWORD[posFilaOrigen]
-    mov QWORD[posFilaDestino], rcx
-    
-    mov rcx, QWORD[posColOrigen]
-    mov QWORD[posColDestino], rcx
+    mov     rcx, QWORD[posColOrigen]
+    mov     QWORD[posColDestino], rcx
     
     ;chequear salto izquierdo superior
-    sub QWORD[posFilaDestino],2
-    sub QWORD[posColDestino],2
+    sub     QWORD[posFilaDestino],2
+    sub     QWORD[posColDestino],2
     macroMatarOficial
     
     ;chequear salto medio superior
-    add QWORD[posColDestino],2
+    add     QWORD[posColDestino],2
     macroMatarOficial
     
     ;chequear salto derecho superior
@@ -249,38 +191,37 @@ validarQueNoTeniaSoldadosAlrededor:
     macroMatarOficial
     
     ;chequear salto medio izquierdo
-    add QWORD[posFilaDestino],2
-    sub QWORD[posColDestino],4
+    add     QWORD[posFilaDestino],2
+    sub     QWORD[posColDestino],4
     macroMatarOficial
     
     ;chequear salto medio derecho
-    add QWORD[posColDestino],4
+    add     QWORD[posColDestino],4
     macroMatarOficial
     
     ;chequear salto izquierdo inferior
-    add QWORD[posFilaDestino],2
-    sub QWORD[posColDestino],4
+    add     QWORD[posFilaDestino],2
+    sub     QWORD[posColDestino],4
     macroMatarOficial
     
     ;chequear salto medio inferior
-    add QWORD[posColDestino],2
+    add     QWORD[posColDestino],2
     macroMatarOficial
     
     ;chequear salto derecho inferior
-    add QWORD[posColDestino],4
+    add     QWORD[posColDestino],4
     macroMatarOficial
     
-    jmp main
+    jmp     main
 
 matarOficial:
     
-    mov QWORD[variableAuxiliar1], r8
-    mov QWORD[variableAuxiliar2], r9
+    mov     QWORD[variableAuxiliar1], r8
+    mov     QWORD[variableAuxiliar2], r9
     
     obtenerCaracterIndice variableAuxiliar1, variableAuxiliar2      
-    mov  BYTE[matriz + rbx +1], ' '
-    jmp main
-
+    mov     BYTE[matriz + rbx +1], ' '
+    jmp     main
 
 inputErroneo:
     
@@ -294,21 +235,20 @@ mostrarOrigenInvalido:
 
 fin:
     imprimirTableroMacro
-    cmp BYTE[GananSoldados],0
-    je  mostrarFinDeJuegoSoldados
+    cmp     BYTE[GananSoldados],0
+    je      mostrarFinDeJuegoSoldados
     
-    print caracterConSalto, 0
-    print msjSeparador, 0
-    print msjGananOficiales, 0
-    print msjSeparador, 0
+    print   caracterConSalto, 0
+    print   msjSeparador, 0
+    print   msjGananOficiales, 0
+    print   msjSeparador, 0
     
     ret
     
-    
 mostrarFinDeJuegoSoldados:
-    print caracterConSalto, 0
-    print msjSeparador, 0
-    print msjGananSoldados, 0
-    print msjSeparador, 0
+    print   caracterConSalto, 0
+    print   msjSeparador, 0
+    print   msjGananSoldados, 0
+    print   msjSeparador, 0
     
     ret
